@@ -1,1 +1,1 @@
-This is my first version of My wallet . More features and lot of full stack development needed . Than you.
+This is my first version of My wallet . More features and lot of full stack development needed . Thank you.
