@@ -18,20 +18,26 @@ public class Expense {
     private String description ;
     private double amount ;
 
-
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
 
     @ManyToOne
     @JoinColumn(name = "user_id" , nullable = false)
     private User user ;
 
+    @ManyToOne
+    @JoinColumn(name = "bank_account_id", nullable = false)
+    private BankAccount bankAccount;
+
     public Expense(){}
 
-    public Expense(String category, String description , double amount , LocalDate date , User user){
+    public Expense(String category, String description , double amount , LocalDate date , User user, BankAccount bankAccount){
         this.category = category;
-        this.description = category;
+        this.description = description;
         this.amount = amount;
         this.date = date ;
+        this.user = user;
+        this.bankAccount = bankAccount;
     }
 //    getters and setters
 
@@ -82,5 +88,12 @@ public class Expense {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public  BankAccount getBankAccount(){
+        return  bankAccount;
+    }
+    public void setBankAccount(BankAccount bankAccount){
+        this.bankAccount = bankAccount;
     }
 }

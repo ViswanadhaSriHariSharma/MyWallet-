@@ -1,61 +1,57 @@
 package Banking.MyApplication.model.controller;
-import Banking.MyApplication.model.User;
-import Banking.MyApplication.service.UserService;
-import jdk.jfr.Description;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-@CrossOrigin(origins = "http://localhost:3000")
+import Banking.MyApplication.model.User;
+import Banking.MyApplication.repository.UserRepository;
+import Banking.MyApplication.service.UserService;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+
 @RestController
 @RequestMapping("/users")
+@CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
 
-    private final UserService service;
+    private final UserService userService;
+    private final UserRepository userRepository;
 
-    public UserController(UserService service){
-        this.service = service;
+    public UserController(UserService userService, UserRepository userRepository) {
+        this.userService = userService;
+        this.userRepository = userRepository;
     }
 
-    @PostMapping
-    public User createUser(@RequestBody User user){
-        return service.createUser(user);
-    }
-    @GetMapping
-    public List<User> getAllUsers(){
-        return service.getallUsers();
-    }
-    @GetMapping("/{id}")
-    public User getUserById(@PathVariable Long id){
-        return service.getUserById(id);
-    }
-    @PutMapping("/{id}")
-    public User updateUser(@PathVariable Long id, @RequestBody User user){
-        return service.updateUser(id, user);
-    }
-    @DeleteMapping("/{id}")
-    public String deleteUser(@PathVariable Long id){
-        service.deleteUser(id);
-        return "User deleted with id : " + id;
-    }
-    @PostMapping("/login")
-    public ResponseEntity<Map<String,Object>> loginUser(@RequestBody User user){
-        User existingUser = service.findByUsername(user.getUsername());
+    // --------------------- Get Logged-in User Profile ------------------
+    @GetMapping("/me")
+    public User getMyProfile(Authentication authentication) {
+        String username = authentication.getName();
 
-        if(existingUser != null && existingUser.getPassword().equals(user.getPassword())){
-            return ResponseEntity.ok(
-                    Map.of(
-                            "status" , "ok",
-                            "userId", existingUser.getId(),
-                            "username", existingUser.getUsername()
-                    )
-            );
-        }
-        else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("status","error", "message", "Invaild credentials "));
-        }
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    // --------------------- Update Logged-in User ---------------------
+//    @PutMapping("/update")
+//    public User updateMyProfile(@RequestBody User updatedUser,
+//                                Authentication authentication) {
+//
+//        String username = authentication.getName();
+//
+//        User existingUser = userRepository.findByUsername(username)
+//                .orElseThrow(() -> new RuntimeException("User not found"));
+//
+//        return userService.updateUser(existingUser.getId(), updatedUser);
+//    }
+
+    // --------------------- Delete Logged-in User ---------------------
+    @DeleteMapping("/delete")
+    public String deleteMyAccount(Authentication authentication) {
+
+        String username = authentication.getName();
+
+        User existingUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        userService.deleteUser(existingUser.getId());
+
+        return "Your account has been deleted.";
     }
 }

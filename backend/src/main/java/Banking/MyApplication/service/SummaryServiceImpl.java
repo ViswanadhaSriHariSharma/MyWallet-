@@ -20,6 +20,6 @@ public class SummaryServiceImpl implements SummaryService {
     public SummaryDTO getSummaryByUser(Long userId){
         double totalIncome = incomeRepository.getTotalIncomeByUser(userId);
         double totalExpense = expenseRepository.getTotalExpenseByUser(userId);
-        return new SummaryDTO(totalIncome, totalExpense);
+        return new SummaryDTO(totalExpense,totalIncome);
     }
 }
